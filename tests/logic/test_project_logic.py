@@ -2,6 +2,8 @@ import sqlite3
 from textwrap import dedent
 from unittest import TestCase, mock
 
+from faker import Faker
+
 from src.logic import project_logic
 from src.logic.project_exceptions import (
     EmptyUserInput,
@@ -11,6 +13,11 @@ from src.logic.project_exceptions import (
 
 
 class TestCreateProjectLogic(TestCase):
+    def setUp(self) -> None:
+        self.faker = Faker()
+        self.project_name = self.faker.catch_phrase()
+        self.project_context = self.faker.paragraph()
+
     @mock.patch("src.logic.project_logic.click")
     @mock.patch("src.logic.project_logic.project_repository")
     def test_create_throw_exception_when_user_input_is_none(
@@ -29,10 +36,10 @@ class TestCreateProjectLogic(TestCase):
         self, mock_project_repo, mock_click
     ):
         mock_click.edit.return_value = dedent(
-            """
+            f"""
             ---
             Context:
-            Feature requested by the user
+            {self.project_context}
             """
         )
 
@@ -47,11 +54,11 @@ class TestCreateProjectLogic(TestCase):
         self, mock_project_repo, mock_click
     ):
         mock_click.edit.return_value = dedent(
-            """
+            f"""
             Name:
             ---
             Context:
-            Feature requested by the user
+            {self.project_context}
             """
         )
 
@@ -66,9 +73,9 @@ class TestCreateProjectLogic(TestCase):
         self, mock_project_repo, mock_click
     ):
         mock_click.edit.return_value = dedent(
-            """
+            f"""
             Name:
-            User toggle
+            {self.project_name}
             ---
             """
         )
@@ -84,9 +91,9 @@ class TestCreateProjectLogic(TestCase):
         self, mock_project_repo, mock_click
     ):
         mock_click.edit.return_value = dedent(
-            """
+            f"""
             Name:
-            User toggle
+            {self.project_name}
             ---
             Context:
             """
@@ -104,12 +111,12 @@ class TestCreateProjectLogic(TestCase):
     ):
         mock_project_repo.create.side_effect = sqlite3.IntegrityError()
         mock_click.edit.return_value = dedent(
-            """
+            f"""
             Name:
-            User toggle
+            {self.project_name}
             ---
             Context:
-            Users need this feature to choose their preference
+            {self.project_context}
             """
         )
 
@@ -119,18 +126,18 @@ class TestCreateProjectLogic(TestCase):
     @mock.patch("src.logic.project_logic.click")
     @mock.patch("src.logic.project_logic.project_repository")
     def test_create_successfully_saves(self, mock_project_repo, mock_click):
-        project_name = "User toogle"
-        project_context = "Users need this feature to choose their preference"
         mock_click.edit.return_value = dedent(
             f"""
             Name:
-            {project_name}
+            {self.project_name}
             ---
             Context:
-            {project_context}
+            {self.project_context}
             """
         )
 
         project_logic.create()
 
-        mock_project_repo.create.assert_called_with(project_name, project_context)
+        mock_project_repo.create.assert_called_with(
+            self.project_name, self.project_context
+        )
