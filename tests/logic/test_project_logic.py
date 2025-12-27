@@ -3,6 +3,7 @@ from textwrap import dedent
 from unittest import TestCase, mock
 
 from faker import Faker
+from pytest_mock import MockerFixture
 
 from src.logic import project_logic
 from src.logic.project_exceptions import (
@@ -193,3 +194,36 @@ class TestUpdateProjectLogic(TestCase):
 
         with self.assertRaises(sqlite3.IntegrityError):
             project_logic.update(self.project_id)
+
+
+def test_list_projects_returns_empty_list_when_there_are_no_projects(
+    mocker: MockerFixture,
+):
+    mock_project_repo = mocker.patch("src.logic.project_logic.project_repository")
+    mock_console_print = mocker.patch("src.logic.project_logic.Console.print")
+    mock_project_repo.read.return_value = []
+
+    project_logic.read()
+
+    mock_console_print.assert_called_once()
+
+
+def test_list_projects_shows_projects_with_properties(
+    mocker: MockerFixture, faker: Faker
+):
+    mocker.patch("src.logic.project_logic.Table.add_row")
+    mock_console_print = mocker.patch("src.logic.project_logic.Console.print")
+    mock_project_repo = mocker.patch("src.logic.project_logic.project_repository")
+    projects = [
+        {
+            "id": faker.random_int(),
+            "name": faker.catch_phrase(),
+            "context": faker.paragraph(),
+            "created_at": faker.date_time(),
+        }
+    ]
+    mock_project_repo.read.return_value = projects
+
+    project_logic.read()
+
+    mock_console_print.assert_called_once()

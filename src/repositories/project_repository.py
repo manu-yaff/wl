@@ -76,3 +76,23 @@ def update(id: int, name: str, context: str):
     except Exception as e:
         print(f"Error: {e}")
         raise
+
+
+def read() -> list:
+    try:
+        with sqlite3.connect(DATABASE_NAME) as connection:
+            connection.row_factory = sqlite3.Row
+
+            cursor = connection.cursor()
+
+            read_all_query = """SELECT * FROM Project"""
+
+            cursor.execute(read_all_query)
+
+            print("Projects read successfully")
+
+            return cursor.fetchall()
+
+    except Exception as e:
+        print(f"Error: {e}")
+        raise

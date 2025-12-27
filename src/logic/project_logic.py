@@ -1,6 +1,8 @@
 from textwrap import dedent
 
 import click
+from rich.console import Console
+from rich.table import Table
 
 from src.logic.project_exceptions import (
     EmptyUserInput,
@@ -74,3 +76,22 @@ def update(id: int):
     updated_context = project_input["Context"]
 
     project_repository.update(id, updated_name, updated_context)
+
+
+def read():
+    projects = project_repository.read()
+
+    table = Table("Id", "Project", "Context", "Date created")
+    console = Console()
+
+    for project in projects:
+        id, name, context, created_at = (
+            project["id"],
+            project["name"],
+            project["context"],
+            project["created_at"],
+        )
+
+        table.add_row(str(id), name, context, created_at)
+
+    console.print(table)

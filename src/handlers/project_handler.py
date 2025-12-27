@@ -10,3 +10,11 @@ def create():
 @app.command()
 def update(id: int):
     project_logic.update(id)
+
+
+@app.command()
+def read():
+    """
+    Lists all projects
+    """
+    project_logic.read()
