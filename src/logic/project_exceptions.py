@@ -8,3 +8,7 @@ class InvalidProjectName(Exception):
 
 class InvalidProjectContext(Exception):
     pass
+
+
+class ProjectDoesNotExists(Exception):
+    pass

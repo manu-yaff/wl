@@ -9,11 +9,12 @@ from src.logic.project_exceptions import (
     EmptyUserInput,
     InvalidProjectContext,
     InvalidProjectName,
+    ProjectDoesNotExists,
 )
 
 
 class TestCreateProjectLogic(TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.faker = Faker()
         self.project_name = self.faker.catch_phrase()
         self.project_context = self.faker.paragraph()
@@ -141,3 +142,54 @@ class TestCreateProjectLogic(TestCase):
         mock_project_repo.create.assert_called_with(
             self.project_name, self.project_context
         )
+
+
+class TestUpdateProjectLogic(TestCase):
+    def setUp(self):
+        self.faker = Faker()
+        self.project_id = self.faker.random_int(min=1, max=100000)
+        self.project_name = self.faker.catch_phrase()
+        self.project_context = self.faker.paragraph()
+
+    @mock.patch("src.logic.project_logic.project_repository")
+    def test_update_project_does_not_exists(self, mock_project_repo):
+        mock_project_repo.get.return_value = None
+
+        with self.assertRaises(ProjectDoesNotExists):
+            project_logic.update(self.project_id)
+
+    @mock.patch("src.logic.project_logic.click")
+    @mock.patch("src.logic.project_logic.project_repository")
+    def test_update_successfully_saves(self, mock_project_repo, mock_click):
+        mock_click.edit.return_value = dedent(
+            f"""
+            Name:
+            {self.project_name}
+            ---
+            Context:
+            {self.project_context}
+            """
+        )
+
+        project_logic.update(self.project_id)
+
+        mock_project_repo.update.assert_called_with(
+            self.project_id, self.project_name, self.project_context
+        )
+
+    @mock.patch("src.logic.project_logic.click")
+    @mock.patch("src.logic.project_logic.project_repository")
+    def test_update_project_name_already_exists(self, mock_project_repo, mock_click):
+        mock_project_repo.update.side_effect = sqlite3.IntegrityError()
+        mock_click.edit.return_value = dedent(
+            f"""
+            Name:
+            {self.project_name}
+            ---
+            Context:
+            {self.project_context}
+            """
+        )
+
+        with self.assertRaises(sqlite3.IntegrityError):
+            project_logic.update(self.project_id)
