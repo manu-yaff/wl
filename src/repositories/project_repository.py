@@ -7,6 +7,7 @@ from src.db.create_project_table import DATABASE_NAME
 def create(name: Optional[str], context: Optional[str]):
     try:
         with sqlite3.connect(DATABASE_NAME) as connection:
+            # TODO: use row_factory
             cursor = connection.cursor()
 
             create_project_query_string = """
