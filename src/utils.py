@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-def parse_user_input(content: str) -> dict[str, str]:
+def parse_user_input(content: str, keys_to_extract: tuple) -> dict[str, str]:
     current_field: Optional[str | None] = None
     data: dict[str, list[str]] = {}
 
@@ -11,8 +11,8 @@ def parse_user_input(content: str) -> dict[str, str]:
             continue
 
         if line.endswith(":"):
-            name = line[:-1].strip()
-            if name in ("Name", "Context"):
+            name = line[:-1].strip().lower()
+            if name in keys_to_extract:
                 current_field = name
                 data.setdefault(name, [])
                 continue

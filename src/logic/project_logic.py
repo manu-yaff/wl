@@ -30,12 +30,14 @@ def create():
     if user_input is None:
         raise EmptyUserInput()
 
-    project_input = parse_user_input(user_input)
+    keys_to_extract = ("name", "context")
 
-    if "Name" not in project_input or project_input["Name"] == "":
+    project_input = parse_user_input(user_input, keys_to_extract)
+
+    if "name" not in project_input or project_input["name"] == "":
         raise InvalidProjectName()
 
-    if "Context" not in project_input or project_input["Context"] == "":
+    if "context" not in project_input or project_input["context"] == "":
         raise InvalidProjectContext()
 
     name, context = project_input.values()
@@ -64,16 +66,16 @@ def update(id: int):
     if (user_input := click.edit(text=update_project_template)) is None:
         raise EmptyUserInput()
 
-    project_input = parse_user_input(user_input)
+    project_input = parse_user_input(user_input, ("name", "context"))
 
-    if "Name" not in project_input or project_input["Name"] == "":
+    if "name" not in project_input or project_input["name"] == "":
         raise InvalidProjectName()
 
-    if "Context" not in project_input or project_input["Context"] == "":
+    if "name" not in project_input or project_input["context"] == "":
         raise InvalidProjectContext()
 
-    updated_name = project_input["Name"]
-    updated_context = project_input["Context"]
+    updated_name = project_input["name"]
+    updated_context = project_input["context"]
 
     project_repository.update(id, updated_name, updated_context)
 

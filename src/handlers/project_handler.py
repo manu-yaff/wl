@@ -1,5 +1,8 @@
-from src.app import app
+import typer
+
 from src.logic import project_logic
+
+app = typer.Typer()
 
 
 @app.command()
