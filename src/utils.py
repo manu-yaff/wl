@@ -11,7 +11,7 @@ def parse_user_input(content: str, keys_to_extract: tuple) -> dict[str, str]:
             continue
 
         if line.endswith(":"):
-            name = line[:-1].strip().lower()
+            name = "_".join(line[:-1].split()).lower()
             if name in keys_to_extract:
                 current_field = name
                 data.setdefault(name, [])
