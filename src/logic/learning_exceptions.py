@@ -12,7 +12,3 @@ class InvalidLearningType(Exception):
 
 class LearningNotFound(Exception):
     pass
-
-
-class InvalidLearningId(Exception):
-    pass
