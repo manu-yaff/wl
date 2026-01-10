@@ -6,13 +6,13 @@ from faker import Faker
 from pytest_mock import MockerFixture
 
 from src.logic import learning_logic
-from src.logic.learning_logic import (
+from src.logic.learning_exceptions import (
     InvalidChallenge,
     InvalidLearningType,
-    InvalidProjectId,
     InvalidSolution,
     LearningNotFound,
 )
+from src.utils import InvalidId
 
 
 def test_create_learning_fails_when_challenge_is_empty(
@@ -495,7 +495,7 @@ class TestUpdateLearning:
             """
         )
 
-        with pytest.raises(InvalidProjectId):
+        with pytest.raises(InvalidId):
             learning_logic.update(learning_id)
 
         mock_learning_repo.assert_not_called()

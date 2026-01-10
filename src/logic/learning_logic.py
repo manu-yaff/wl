@@ -3,28 +3,14 @@ from typing import Optional
 
 import click
 
+from src.logic.learning_exceptions import (
+    InvalidChallenge,
+    InvalidLearningType,
+    InvalidSolution,
+    LearningNotFound,
+)
 from src.repositories import learning_repository
-from src.utils import parse_user_input
-
-
-class InvalidChallenge(Exception):
-    pass
-
-
-class InvalidSolution(Exception):
-    pass
-
-
-class InvalidLearningType(Exception):
-    pass
-
-
-class LearningNotFound(Exception):
-    pass
-
-
-class InvalidProjectId(Exception):
-    pass
+from src.utils import Id, parse_user_input
 
 
 def create(project_id: Optional[int]):
@@ -78,7 +64,6 @@ def update(id: int):
     learning_type = learning.get("learning_type")
     project_id = learning.get("project_id")
 
-    # TODO: add the placeholder here
     create_learning_template = dedent(
         f"""\
         Challenge:
@@ -99,6 +84,7 @@ def update(id: int):
         {project_id}
         """
     )
+
     keys_to_extract = ("challenge", "solution", "type", "project_id")
 
     if (user_input := click.edit(create_learning_template)) is None:
@@ -123,12 +109,8 @@ def update(id: int):
         learning_input.get("project_id") is not None
         and learning_input.get("project_id") != ""
     ):
-        try:
-            value = learning_input.get("project_id")
-            assert value is not None
-            int(value)
-        except Exception:
-            raise InvalidProjectId()
+        value = learning_input.get("project_id")
+        Id.validate(value)
 
     updated_challenge = learning_input["challenge"]
     updated_solution = learning_input["solution"]

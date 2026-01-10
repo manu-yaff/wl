@@ -1,6 +1,22 @@
 from typing import Optional
 
 
+class InvalidId(Exception):
+    pass
+
+
+class Id:
+    @staticmethod
+    def validate(id: int | str | None):
+        if id is None:
+            raise InvalidId()
+
+        try:
+            int(id)
+        except Exception:
+            raise InvalidId()
+
+
 def parse_user_input(content: str, keys_to_extract: tuple) -> dict[str, str]:
     current_field: Optional[str | None] = None
     data: dict[str, list[str]] = {}
