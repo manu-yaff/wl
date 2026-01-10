@@ -286,7 +286,7 @@ class TestUpdateLearning:
 
         mock_learning_repo.assert_not_called()
 
-    def test_update_learning_fails_challenge_is_missing(
+    def test_update_learning_fails_when_challenge_is_missing(
         self, mocker: MockerFixture, faker: Faker
     ):
         learning_id = faker.random_int()
@@ -439,35 +439,6 @@ class TestUpdateLearning:
 
         mock_learning_repo.assert_not_called()
 
-    def test_update_learning_fails_when_data_base_insertion_fails(
-        self, mocker: MockerFixture, faker: Faker
-    ):
-        learning_id = faker.random_int()
-        mock_learning_repo = mocker.patch(
-            "src.logic.learning_logic.learning_repository"
-        )
-        mock_learning_repo.update.side_effect = sqlite3.IntegrityError()
-        mock_click_edit = mocker.patch("src.logic.learning_logic.click")
-        mock_click_edit.edit.return_value = dedent(
-            """
-            Challenge:
-            this is a challenge
-            
-            ---
-            Solution:
-            this is a solution
-
-            ---
-            Type:
-            soft
-            """
-        )
-
-        with pytest.raises(sqlite3.IntegrityError):
-            learning_logic.update(learning_id)
-
-        mock_learning_repo.assert_not_called()
-
     def test_update_learning_fails_when_project_id_is_not_number(
         self, mocker: MockerFixture, faker: Faker
     ):
@@ -500,7 +471,36 @@ class TestUpdateLearning:
 
         mock_learning_repo.assert_not_called()
 
-    def test_update_learning_successfully_saves_when_project_id_is_missing(
+    def test_update_learning_fails_when_data_base_insertion_fails(
+        self, mocker: MockerFixture, faker: Faker
+    ):
+        learning_id = faker.random_int()
+        mock_learning_repo = mocker.patch(
+            "src.logic.learning_logic.learning_repository"
+        )
+        mock_learning_repo.update.side_effect = sqlite3.IntegrityError()
+        mock_click_edit = mocker.patch("src.logic.learning_logic.click")
+        mock_click_edit.edit.return_value = dedent(
+            """
+            Challenge:
+            this is a challenge
+            
+            ---
+            Solution:
+            this is a solution
+
+            ---
+            Type:
+            soft
+            """
+        )
+
+        with pytest.raises(sqlite3.IntegrityError):
+            learning_logic.update(learning_id)
+
+        mock_learning_repo.assert_not_called()
+
+    def test_update_learning_successfully_saves_in_db_when_project_id_is_missing(
         self, mocker: MockerFixture, faker: Faker
     ):
         learning_id = faker.random_int()
@@ -527,7 +527,7 @@ class TestUpdateLearning:
 
         mock_learning_repo.update.assert_called_once()
 
-    def test_update_learning_successfully_saves_when_project_id_is_empty(
+    def test_update_learning_successfully_saves_in_db_when_project_id_is_empty(
         self, mocker: MockerFixture, faker: Faker
     ):
         learning_id = faker.random_int()
@@ -557,7 +557,7 @@ class TestUpdateLearning:
 
         mock_learning_repo.update.assert_called_once()
 
-    def test_update_learning_successfully_saves_in_db(
+    def test_update_learning_successfully_saves_in_db_when_valid_fields(
         self, mocker: MockerFixture, faker: Faker
     ):
         learning_id = faker.random_int()
