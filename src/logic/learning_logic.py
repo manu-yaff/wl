@@ -1,5 +1,4 @@
 from textwrap import dedent
-from typing import Optional
 
 import click
 
@@ -13,7 +12,7 @@ from src.repositories import learning_repository
 from src.utils import Id, parse_user_input
 
 
-def create(project_id: Optional[int]):
+def create():
     create_learning_template = dedent(
         """\
         Challenge:
@@ -25,9 +24,12 @@ def create(project_id: Optional[int]):
         ---
 
         Type:
+
+        ---
+        Project id:
         """
     )
-    keys_to_extract = ("challenge", "solution", "type")
+    keys_to_extract = ("challenge", "solution", "type", "project_id")
 
     if (user_input := click.edit(create_learning_template)) is None:
         raise Exception("Invalid user input")
@@ -47,8 +49,15 @@ def create(project_id: Optional[int]):
     ):
         raise InvalidLearningType()
 
+    if (
+        learning_input.get("project_id") is not None
+        and learning_input.get("project_id") != ""
+    ):
+        value = learning_input.get("project_id")
+        Id.validate(value)
+
     learning_repository.create(
-        project_id,
+        int(learning_input["project_id"]),
         learning_input["challenge"],
         learning_input["solution"],
         learning_input["type"],
@@ -105,7 +114,6 @@ def update(id: int):
     ):
         raise InvalidLearningType()
 
-    breakpoint()
     if (
         learning_input.get("project_id") is not None
         and learning_input.get("project_id") != ""
@@ -119,5 +127,9 @@ def update(id: int):
     updated_project_id = learning_input["project_id"]
 
     learning_repository.update(
-        id, int(updated_project_id), updated_challenge, updated_solution, updated_type
+        id,
+        int(updated_project_id) if updated_project_id else None,
+        updated_challenge,
+        updated_solution,
+        updated_type,
     )

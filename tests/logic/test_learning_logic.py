@@ -18,7 +18,6 @@ from src.utils import InvalidId
 def test_create_learning_fails_when_challenge_is_empty(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -34,7 +33,7 @@ def test_create_learning_fails_when_challenge_is_empty(
     )
 
     with pytest.raises(InvalidChallenge):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -42,7 +41,6 @@ def test_create_learning_fails_when_challenge_is_empty(
 def test_create_learning_fails_when_challenge_is_missing(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -57,7 +55,7 @@ def test_create_learning_fails_when_challenge_is_missing(
     )
 
     with pytest.raises(InvalidChallenge):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -65,7 +63,6 @@ def test_create_learning_fails_when_challenge_is_missing(
 def test_create_learning_fails_when_solution_is_empty(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -81,7 +78,7 @@ def test_create_learning_fails_when_solution_is_empty(
     )
 
     with pytest.raises(InvalidSolution):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -89,7 +86,6 @@ def test_create_learning_fails_when_solution_is_empty(
 def test_create_learning_fails_when_solution_is_missing(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -103,7 +99,7 @@ def test_create_learning_fails_when_solution_is_missing(
     )
 
     with pytest.raises(InvalidSolution):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -111,7 +107,6 @@ def test_create_learning_fails_when_solution_is_missing(
 def test_create_learning_fails_when_learning_type_is_empty(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -127,7 +122,7 @@ def test_create_learning_fails_when_learning_type_is_empty(
     )
 
     with pytest.raises(InvalidLearningType):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -135,7 +130,6 @@ def test_create_learning_fails_when_learning_type_is_empty(
 def test_create_learning_fails_when_learning_type_is_missing(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -151,7 +145,7 @@ def test_create_learning_fails_when_learning_type_is_missing(
     )
 
     with pytest.raises(InvalidLearningType):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -159,7 +153,6 @@ def test_create_learning_fails_when_learning_type_is_missing(
 def test_create_learning_fails_when_learning_type_is_not_allowed(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -176,7 +169,7 @@ def test_create_learning_fails_when_learning_type_is_not_allowed(
     )
 
     with pytest.raises(InvalidLearningType):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -184,7 +177,6 @@ def test_create_learning_fails_when_learning_type_is_not_allowed(
 def test_create_learning_fails_when_data_base_insertion_fails(
     mocker: MockerFixture, faker: Faker
 ):
-    project_id = faker.random_int()
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
@@ -197,12 +189,16 @@ def test_create_learning_fails_when_data_base_insertion_fails(
         ---
         Type:
         soft
+
+        ---
+        Project id:
+        1
         """
     )
     mock_learning_repo.create.side_effect = sqlite3.IntegrityError()
 
     with pytest.raises(sqlite3.IntegrityError):
-        learning_logic.create(project_id)
+        learning_logic.create()
 
     mock_learning_repo.assert_not_called()
 
@@ -212,7 +208,7 @@ def test_create_learning_successfully_saves_in_db(mocker: MockerFixture, faker: 
     mock_learning_repo = mocker.patch("src.logic.learning_logic.learning_repository")
     mock_click_edit = mocker.patch("src.logic.learning_logic.click")
     mock_click_edit.edit.return_value = dedent(
-        """\
+        f"""\
         Challenge:
         Error while compiling code
         ---
@@ -221,10 +217,13 @@ def test_create_learning_successfully_saves_in_db(mocker: MockerFixture, faker: 
         ---
         Type:
         soft
+        ---
+        Project id:
+        {project_id}
         """
     )
 
-    learning_logic.create(project_id)
+    learning_logic.create()
 
     mock_learning_repo.create.assert_called_with(
         project_id,
@@ -492,6 +491,9 @@ class TestUpdateLearning:
             ---
             Type:
             soft
+            ---
+            Project id:
+            1
             """
         )
 
@@ -520,6 +522,10 @@ class TestUpdateLearning:
             ---
             Type:
             soft
+
+            ---
+            Project id:
+            1
             """
         )
 
