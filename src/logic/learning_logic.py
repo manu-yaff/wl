@@ -59,10 +59,10 @@ def update(id: int):
     if (learning := learning_repository.get(id)) is None:
         raise LearningNotFound()
 
-    challenge = learning.get("challenge")
-    solution = learning.get("solution")
-    learning_type = learning.get("learning_type")
-    project_id = learning.get("project_id")
+    challenge = learning["challenge"]
+    solution = learning["solution"]
+    learning_type = learning["learning_type"]
+    project_id = learning["project_id"]
 
     create_learning_template = dedent(
         f"""\
@@ -105,6 +105,7 @@ def update(id: int):
     ):
         raise InvalidLearningType()
 
+    breakpoint()
     if (
         learning_input.get("project_id") is not None
         and learning_input.get("project_id") != ""
@@ -115,7 +116,8 @@ def update(id: int):
     updated_challenge = learning_input["challenge"]
     updated_solution = learning_input["solution"]
     updated_type = learning_input["type"]
+    updated_project_id = learning_input["project_id"]
 
     learning_repository.update(
-        id, project_id, updated_challenge, updated_solution, updated_type
+        id, int(updated_project_id), updated_challenge, updated_solution, updated_type
     )
