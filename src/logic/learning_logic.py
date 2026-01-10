@@ -1,39 +1,18 @@
-from enum import Enum
 from textwrap import dedent
-from typing import Optional
 
 import click
 
+from src.logic.learning_exceptions import (
+    InvalidChallenge,
+    InvalidLearningType,
+    InvalidSolution,
+    LearningNotFound,
+)
 from src.repositories import learning_repository
-from src.utils import parse_user_input
+from src.utils import Id, parse_user_input
 
 
-class InvalidChallenge(Exception):
-    pass
-
-
-class InvalidSolution(Exception):
-    pass
-
-
-class InvalidLearningType(Exception):
-    pass
-
-
-class LearningType(Enum):
-    @staticmethod
-    def contains(value):
-        try:
-            LearningType(value.lower())
-            return True
-        except Exception:
-            return False
-
-    soft = "soft"
-    hard = "hard"
-
-
-def create(project_id: Optional[int]):
+def create():
     create_learning_template = dedent(
         """\
         Challenge:
@@ -45,9 +24,12 @@ def create(project_id: Optional[int]):
         ---
 
         Type:
+
+        ---
+        Project id:
         """
     )
-    keys_to_extract = ("challenge", "solution", "type")
+    keys_to_extract = ("challenge", "solution", "type", "project_id")
 
     if (user_input := click.edit(create_learning_template)) is None:
         raise Exception("Invalid user input")
@@ -61,18 +43,93 @@ def create(project_id: Optional[int]):
         raise InvalidSolution()
 
     if (
-        "type" not in learning_input
-        or learning_input["type"] == ""
-        or (
-            LearningType.soft.value != learning_input["type"]
-            and LearningType.hard.value != learning_input["type"]
-        )
+        not learning_input.get("type")
+        or learning_input.get("type") != "soft"
+        and learning_input.get("type") != "hard"
     ):
         raise InvalidLearningType()
 
+    if (
+        learning_input.get("project_id") is not None
+        and learning_input.get("project_id") != ""
+    ):
+        value = learning_input.get("project_id")
+        Id.validate(value)
+
     learning_repository.create(
-        project_id,
+        int(learning_input["project_id"]),
         learning_input["challenge"],
         learning_input["solution"],
         learning_input["type"],
+    )
+
+
+def update(id: int):
+    if (learning := learning_repository.get(id)) is None:
+        raise LearningNotFound()
+
+    challenge = learning["challenge"]
+    solution = learning["solution"]
+    learning_type = learning["learning_type"]
+    project_id = learning["project_id"]
+
+    create_learning_template = dedent(
+        f"""\
+        Challenge:
+        {challenge}
+
+        ---
+
+        Solution:
+        {solution}
+
+        ---
+
+        Type:
+        {learning_type}
+
+        ---
+        Project id:
+        {project_id}
+        """
+    )
+
+    keys_to_extract = ("challenge", "solution", "type", "project_id")
+
+    if (user_input := click.edit(create_learning_template)) is None:
+        raise Exception("Invalid user input")
+
+    learning_input = parse_user_input(user_input, keys_to_extract)
+
+    if not learning_input.get("challenge"):
+        raise InvalidChallenge()
+
+    if not learning_input.get("solution"):
+        raise InvalidSolution()
+
+    if (
+        not learning_input.get("type")
+        or learning_input.get("type") != "soft"
+        and learning_input.get("type") != "hard"
+    ):
+        raise InvalidLearningType()
+
+    if (
+        learning_input.get("project_id") is not None
+        and learning_input.get("project_id") != ""
+    ):
+        value = learning_input.get("project_id")
+        Id.validate(value)
+
+    updated_challenge = learning_input["challenge"]
+    updated_solution = learning_input["solution"]
+    updated_type = learning_input["type"]
+    updated_project_id = learning_input["project_id"]
+
+    learning_repository.update(
+        id,
+        int(updated_project_id) if updated_project_id else None,
+        updated_challenge,
+        updated_solution,
+        updated_type,
     )

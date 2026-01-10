@@ -1,6 +1,22 @@
 from typing import Optional
 
 
+class InvalidId(Exception):
+    pass
+
+
+class Id:
+    @staticmethod
+    def validate(id: int | str | None):
+        if id is None:
+            raise InvalidId()
+
+        try:
+            int(id)
+        except Exception:
+            raise InvalidId()
+
+
 def parse_user_input(content: str, keys_to_extract: tuple) -> dict[str, str]:
     current_field: Optional[str | None] = None
     data: dict[str, list[str]] = {}
@@ -11,7 +27,7 @@ def parse_user_input(content: str, keys_to_extract: tuple) -> dict[str, str]:
             continue
 
         if line.endswith(":"):
-            name = line[:-1].strip().lower()
+            name = "_".join(line[:-1].split()).lower()
             if name in keys_to_extract:
                 current_field = name
                 data.setdefault(name, [])
