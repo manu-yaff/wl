@@ -80,3 +80,22 @@ def update(
     except Exception as e:
         print(f"Error: {e}")
         raise
+
+
+def read() -> list:
+    try:
+        with sqlite3.connect(DATABASE_NAME) as connection:
+            connection.row_factory = sqlite3.Row
+
+            cursor = connection.cursor()
+
+            read_learnings_query = """SELECT * FROM Learning"""
+
+            cursor.execute(read_learnings_query)
+
+            print("Read records successfully")
+
+            return cursor.fetchall()
+    except Exception as e:
+        print(f"Error: {e}")
+        raise e

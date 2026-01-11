@@ -1,5 +1,6 @@
 import sqlite3
 from textwrap import dedent
+from unittest.mock import call
 
 import pytest
 from faker import Faker
@@ -593,3 +594,58 @@ class TestUpdateLearning:
         learning_logic.update(learning_id)
 
         mock_learning_repo.update.assert_called_once()
+
+
+class TestReadLearnings:
+    def test_read_successfully_when_there_are_no_learnings(self, mocker: MockerFixture):
+        mock_learning_repo = mocker.patch(
+            "src.logic.learning_logic.learning_repository"
+        )
+        mock_console_class = mocker.patch("src.logic.learning_logic.Console")
+        mock_console_instance = mock_console_class.return_value
+        mock_learning_repo.read.return_value = []
+
+        learning_logic.read()
+
+        mock_console_instance.print.assert_called_with("There are no learnings")
+
+    def test_read_successfully_when_there_are_learnings(self, mocker: MockerFixture):
+        mocker.patch("src.logic.learning_logic.Console")
+        mock_table_class = mocker.patch("src.logic.learning_logic.Table")
+        mock_learning_repo = mocker.patch(
+            "src.logic.learning_logic.learning_repository"
+        )
+        mock_table_instance = mock_table_class.return_value
+        mock_learnings = [
+            {
+                "id": 1,
+                "challenge": "challenge 1",
+                "solution": "solution 1",
+                "learning_type": "hard",
+                "project_id": 10,
+                "created_at": "",
+            },
+            {
+                "id": 2,
+                "challenge": "challenge 2",
+                "solution": "solution 2",
+                "learning_type": "soft",
+                "project_id": 10,
+                "created_at": "",
+            },
+            {
+                "id": 3,
+                "challenge": "challenge 3",
+                "solution": "solution 3",
+                "learning_type": "hard",
+                "project_id": 10,
+                "created_at": "",
+            },
+        ]
+        expected_calls = [call(*learning.values()) for learning in mock_learnings]
+        mock_learning_repo.read.return_value = mock_learnings
+
+        learning_logic.read()
+
+        assert mock_table_instance.add_row.call_count == len(mock_learnings)
+        mock_table_instance.add_row.assert_has_calls(expected_calls)

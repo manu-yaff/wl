@@ -1,6 +1,8 @@
 from textwrap import dedent
 
 import click
+from rich.console import Console
+from rich.table import Table
 
 from src.logic.learning_exceptions import (
     InvalidChallenge,
@@ -57,7 +59,7 @@ def create():
         Id.validate(value)
 
     learning_repository.create(
-        int(learning_input["project_id"]),
+        int(learning_input["project_id"]) if learning_input["project_id"] else None,
         learning_input["challenge"],
         learning_input["solution"],
         learning_input["type"],
@@ -133,3 +135,34 @@ def update(id: int):
         updated_solution,
         updated_type,
     )
+
+
+def read():
+    console = Console()
+    table = Table(
+        "Id", "Challenge", "Solution", "Learing Type", "Project id", "Date created"
+    )
+
+    if not (learnings := learning_repository.read()):
+        console.print("There are no learnings")
+
+    for learning in learnings:
+        id, challenge, solution, learning_type, project_id, created_at = (
+            learning["id"],
+            learning["challenge"],
+            learning["solution"],
+            learning["learning_type"],
+            learning["project_id"],
+            learning["created_at"],
+        )
+
+        table.add_row(
+            str(id),
+            challenge,
+            solution,
+            learning_type,
+            str(project_id) if project_id else "None",
+            created_at,
+        )
+
+    console.print(table)
