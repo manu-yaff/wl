@@ -13,3 +13,8 @@ def create():
 @app.command()
 def update(learning_id: int):
     learning_logic.update(learning_id)
+
+
+@app.command()
+def read():
+    learning_logic.read()
