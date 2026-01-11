@@ -642,7 +642,10 @@ class TestReadLearnings:
                 "created_at": "",
             },
         ]
-        expected_calls = [call(*learning.values()) for learning in mock_learnings]
+        expected_calls = [
+            call(*[str(value) for value in learning.values()])
+            for learning in mock_learnings
+        ]
         mock_learning_repo.read.return_value = mock_learnings
 
         learning_logic.read()

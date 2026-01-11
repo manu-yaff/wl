@@ -145,6 +145,7 @@ def read():
 
     if not (learnings := learning_repository.read()):
         console.print("There are no learnings")
+        return
 
     for learning in learnings:
         id, challenge, solution, learning_type, project_id, created_at = (
